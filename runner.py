@@ -1,21 +1,24 @@
 import random
 from agent import Agent
-from world import WorldSquare
+from world import WorldSquare, world_builder_fn
 
 ################################################################################
 # World Setup
 class SimParams():
     # used only to hold simulation level parameters
-    def __init__(self, world_size, num_agents):
+    def __init__(self, world_size, num_agents, resources):
         self.world_size = world_size
         self.num_agents = num_agents
-# create instance to hold class variables
-# this is main line to set up sim-wide params
-sim_params = SimParams(world_size=5, num_agents=2)
+        self.resources = resources
 
-# setup grid of squares
-world_squares = [WorldSquare(x=x, y=y) for x in range(sim_params.world_size) for y in
-        range(sim_params.world_size)]
+# create sim_param instance to hold class variables
+# this is main line to set up sim-wide params
+resources = ['a', 'b', 'c']
+sim_params = SimParams(world_size=5, num_agents=2, resources=resources)
+
+# Build world
+world_squares = world_builder_fn(sim_params.world_size, sim_params.resources)
+print(len(world_squares))
 
 # Setup Agents
 agent_list = [Agent(x=0, y=0, agent_id=i, ws=sim_params.world_size) for i in range(sim_params.num_agents)]              
@@ -34,7 +37,13 @@ for round in range(sim_params.round_length):
     for agent in agent_list:
         agent.print_position()
         random.choice(agent.move_list)(agent)
+        # grab square from world_squares
+        # NOTE: feels hackish after using ruby/where
+        # acs = agents_current_square
+        acs = next((square for square in world_squares if square.x == agent.x and
+            square.y == agent.y), None)
         agent.print_position()
+        if acs.square_resource:
+            print("Square contains resource: ", acs.square_resource)
+
         print("^^^^^^^^^^")
-                                                                                                                        
-                               
