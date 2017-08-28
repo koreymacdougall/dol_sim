@@ -12,16 +12,38 @@ class SimParams():
         self.resources = resources
 
 # create sim_param instance to hold class variables
-# this is main line to set up sim-wide params
-resources = ['a', 'b', 'c']
+# this is main line(s) to set up sim-wide params
+
+resources_list = [        
+        ['resource a', 0.1],
+        ['resource b', 0.1],
+        ['resource c', 0.1]
+        ]
+resources = [ {'name': r[0],  'freq': r[1], 'lower': None, 'upper':
+    None } for r in resources_list ]
+
+print(resources)
+#resource_disribution = {}
+#dist_total = 0
+#for r in resources:
+    #resource_disribution.append(r: range(dist_total, dist_total + r))
+    #print (resources[r])
+    #print (resource_disribution)
+quit()
+
 sim_params = SimParams(world_size=5, num_agents=2, resources=resources)
 
 # Build world
 world_squares = world_builder_fn(sim_params.world_size, sim_params.resources)
-print(len(world_squares))
+print(world_squares)
 
 # Setup Agents
-agent_list = [Agent(x=0, y=0, agent_id=i, ws=sim_params.world_size) for i in range(sim_params.num_agents)]              
+agent_list = [Agent 
+    (x=random.choice(range(sim_params.world_size)),
+    y=random.choice(range(sim_params.world_size)), 
+    agent_id=i,
+    ws=sim_params.world_size) 
+    for i in range(5)]
 
 # number of turns for a single run
 sim_params.round_length = 5
@@ -40,6 +62,7 @@ for round in range(sim_params.round_length):
         # grab square from world_squares
         # NOTE: feels hackish after using ruby/where
         # acs = agents_current_square
+        # next grabs matching instance from iterator
         acs = next((square for square in world_squares if square.x == agent.x and
             square.y == agent.y), None)
         agent.print_position()
