@@ -48,6 +48,9 @@ sim_params = SimParams(world_size=5, num_agents=2, resources=resources)
 # Build world
 world_squares = world_builder_fn(sim_params.world_size, sim_params.resources)
 print(world_squares)
+for s in world_squares:
+    print(s.square_resource, s.x, s.y)
+quit()
 
 # Setup Agents
 agent_list=[]
