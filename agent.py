@@ -10,7 +10,7 @@ class Agent():
         self.y = y
         self.agent_id = agent_id
         # world_size only really needs to be defined for a single agent
-        # but having it as a class param is useful for movement
+        # but having it as a class param is/seems useful for movement
         global world_size
         world_size = ws
         inventory = {}
