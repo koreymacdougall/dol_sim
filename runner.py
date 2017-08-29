@@ -26,7 +26,6 @@ resources_list = [
 resources = [ {'name': r[0],  'freq': r[1], 'lower': None, 'upper':
     None } for r in resources_list ]
 
-res_dist = sorted(range(len(resources_list)), key = lambda k: resources_list[k])
 for reso in resources_list:
     lower = 0
     index = resources_list.index(reso)
@@ -36,8 +35,8 @@ for reso in resources_list:
                 r['lower'] = 0
                 r['upper'] = reso[1]
     else:
-        for sub_resp in resources_list[0:index]:
-            lower += sub_resp[1]
+        for sub_reso in resources_list[0:index]:
+            lower += sub_reso[1]
         for r in resources:
             if r['name'] == reso[0]:
                 r['lower'] = lower
