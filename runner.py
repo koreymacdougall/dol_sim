@@ -4,6 +4,7 @@ from world import WorldSquare, world_builder_fn#, resource_distributor
 
 ################################################################################
 # World Setup
+
 class SimParams():
     # used only to hold simulation level parameters
     def __init__(self, world_size, num_agents, resources):
