@@ -1,6 +1,7 @@
 import random
+from decimal import Decimal, getcontext
 from agent import Agent
-from world import WorldSquare, world_builder_fn#, resource_distributor
+from world import WorldSquare, world_builder_fn
 
 ################################################################################
 # World Setup
@@ -16,12 +17,11 @@ class SimParams():
 # this is main line(s) to set up sim-wide params
 
 #TODO - move resource allocation into world.py ?
+#get_context().prec = 2
 resources_list = [        
-        ['resource a', 0.1],
-        ['resource b', 0.1],
-        ['resource c', 0.1],
-        ['resource d', 0.2],
-        ['resource e', 0.4]
+        ['resource a', round(Decimal(0.1), 2)],
+        ['resource b', round(Decimal(0.1), 2)],
+        ['resource e', round(Decimal(0.2), 2)]
         ]
 
 resources = [ {'name': r[0],  'freq': r[1], 'lower': None, 'upper':
@@ -33,7 +33,7 @@ for reso in resources_list:
     if index == 0:
         for r in resources:
             if r['name'] == reso[0]:
-                r['lower'] = 0
+                r['lower'] = round(Decimal(0), 2)
                 r['upper'] = reso[1]
     else:
         for sub_reso in resources_list[0:index]:
@@ -51,7 +51,6 @@ world_squares = world_builder_fn(sim_params.world_size, sim_params.resources)
 print(world_squares)
 for s in world_squares:
     print(s.square_resource, s.x, s.y)
-quit()
 
 # Setup Agents
 agent_list=[]

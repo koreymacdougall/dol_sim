@@ -1,5 +1,6 @@
 import random
 import time
+
 class WorldSquare():
     def __init__(self, x, y, square_resource):
         self.x = x
@@ -12,8 +13,6 @@ class WorldSquare():
 
 # setup grid of squares
 def world_builder_fn(world_size, resources):
-    #world = [ WorldSquare(x=x, y=y, square_resource=random.choice(resources)) for x in
-            #range(world_size) for y in range(world_size) ]
     world = [ WorldSquare(x=x, y=y,
         square_resource=resource_selector_fn(resources)) for x in
             range(world_size) for y in range(world_size) ]
@@ -21,9 +20,9 @@ def world_builder_fn(world_size, resources):
 
 def resource_selector_fn(resources):
     n = random.random()
-    print(n)
     for resource in resources:
         if n > resource['lower'] and n <= resource['upper']:
+            print(n, " is between ", resource['lower'], " and ", resource['upper'])
             return resource
     return None
 
