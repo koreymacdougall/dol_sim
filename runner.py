@@ -7,7 +7,7 @@ from world import WorldSquare, world_builder_fn
 # World Setup
 
 class SimParams():
-    # used only to hold simulation level parameters
+    # instance used only to hold simulation level parameters
     def __init__(self, world_size, num_agents, resources):
         self.world_size = world_size
         self.num_agents = num_agents
@@ -16,6 +16,7 @@ class SimParams():
 # create sim_param instance to hold class variables
 # this is main line(s) to set up sim-wide params
 
+# this is to be set by experimenter; resources, below, are what's used in sim
 resources_list = [
         ['resource a', round(Decimal(0.1), 2)],
         ['resource b', round(Decimal(0.1), 2)],
@@ -64,7 +65,9 @@ for i in range(sim_params.num_agents):
         x=random.choice(range(sim_params.world_size)),
         y=random.choice(range(sim_params.world_size)),
         agent_id=i,
-        ws=sim_params.world_size))
+        world_squares = world_squares,
+        harvest_duration = 2,
+        ))
 
 
 # number of turns for a single run
@@ -79,25 +82,46 @@ for round in range(sim_params.round_length):
     print("====================")
     for agent in agent_list:
         agent.print_position()
+        print(agent.action)
         # grab agents' current square from world_squares
         # "next" grabs matching instance from iterator
-        agent.current_square = next((square for square in world_squares if square.x == agent.x and
+        agent.position = next((square for square in world_squares if square.x == agent.x and
             square.y == agent.y), None)
-        # top lvl action choice: choose between moving, manipulating resources,
+        # main action: choose between moving, manipulating resources,
         # or something else (TBD); currently random, TODO: will change
-        # second lvl action choice: choose a sub-action
+        # sub action : choose a sub-action
         # e.g., move left, move up, harvest resource, trade resource, etc
-        top_lvl_action_choice = random.choice(agent.full_action_list)
-        if top_lvl_action_choice == agent.resource_action_list:
+
+        if agent.action == "":
+            main_action = random.choice(agent.full_action_list)
+        else:
+            main_action = agent.resource_action_list
+
+        if main_action == agent.resource_action_list:
             # i.e., if agent is choosing to do something with resources
-            # then pass world_squares as an argument
-            second_lvl_action_choice = random.choice(top_lvl_action_choice)(agent, world_squares)
-        elif top_lvl_action_choice == agent.move_list:
-            # i.e., if agent is moving, only pass self
-            second_lvl_action_choice = random.choice(top_lvl_action_choice)(agent)
+            # then pass world_squares as an argument, round num for counter
+            if agent.action == "harvesting":
+                print ("agent is harvesting!")
+                print ("harvesting started on round:", agent.action_start_time)
+                print ("harvesting will end on round:", agent.action_end_time)
+                if round >= agent.action_end_time:
+                    print("agent has finished harvesting", agent.position.square_resource)
+                    quit()
+                else:
+                    print("agent is still harvesting", agent.position.square_resource)
+
+            else:
+                sub_action = random.choice(main_action)(agent, world_squares, round)
+        elif main_action == agent.move_list:
+            # i.e., if agent is moving, pass sim params to access world_size
+            sub_action = random.choice(main_action)(agent, sim_params)
 
         agent.print_position()
-        if agent.current_square.square_resource:
-            print("Square contains resource: something")
+        if agent.position.square_resource: \
+            print("Square contains resource: ", \
+            agent.position.square_resource["name"])
 
         print("^^^^^^^^^^")
+
+print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+print("Simulation complete")
