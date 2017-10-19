@@ -20,7 +20,7 @@ class Agent():
         # vary per agent
         self.harvest_duration = harvest_duration
         self.refine_duration = refine_duration
-        self.action = ""
+        self.action = None
         # learning rate will determine how quickly skills improve
         # higher rate, sooner to reach the next level of master
         # Note - this will be a step-wise learning model, with discrete jumps
