@@ -4,18 +4,20 @@ from runner import round_runner
 # world_sizes = []
 # num_agents = []
 # round_lengths =[]
-num_runs = 5
-num_agents = 3
+num_runs = 500
+num_agents = [1,2,3, 4, 5, 6]
 
 # initial header setup
 with open ("data/data_test.txt", "a") as f:
     f.write("Run Num, Num Runs to Completion, Num Agents, \n")
 
-for run in range(num_runs):
-    num_rounds_to_complete= round_runner(num_agents)
-    with open ("data/data_test.txt", "a") as f:
-        f.write("({}, {}, {}),  \n".format(run, num_rounds_to_complete,
-            num_agents )) 
+for agent_count in num_agents:
+    for run in range(num_runs):
+        num_rounds_to_complete = round_runner(agent_count)
+        with open ("data/data_test.txt", "a") as f:
+            f.write("{}, {}, {},  \n".format(run, num_rounds_to_complete, \
+                agent_count ))
 
 with open ("data/data_test.txt", "r") as f:
-    print(f.read(), end="")
+    #print(f.read(), end="")
+    pass
