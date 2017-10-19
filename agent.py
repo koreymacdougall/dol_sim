@@ -8,13 +8,12 @@ class Agent():
 
 #global world_size
 
-    def __init__(self, x, y, id, world_squares, harvest_duration,
-            refine_duration, learning_rate):
-        world_squares = world_squares
+    def __init__(self, x, y, id, harvest_duration,
+            refine_duration, learning_rate, world):
         self.x = x
         self.y = y
         # next method, iterator fn, seems like ruby's first fn
-        self.position = next((square for square in world_squares if square.x ==\
+        self.position = next((square for square in world.squares if square.x ==\
             self.x and square.y == self.y), None)
         print (self.x, self.y, self.position.x, self.position.y)
         self.id = id

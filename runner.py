@@ -1,37 +1,51 @@
 import random
 from decimal import Decimal, getcontext
 from agent import Agent
-from world import WorldSquare, world_builder_fn
+from world import World, WorldSquare, squares_builder_fn
 
 ################################################################################
 # World Setup
 
 class SimParams():
     # instance used only to hold simulation level parameters
-    def __init__(self, world_size, num_agents, resources):
+    def __init__(self, world_size, num_agents, resources, round_length):
+        #world size is a square, rg 5*5
         self.world_size = world_size
+        # num agents is count of agents
         self.num_agents = num_agents
+        #resources are raw items that are modified to make artifcats
         self.resources = resources
+        # round length is num turns in a single round
+        self.round_length = round_length
 
-# Main line(s) to set up sim-wide params
+#Resources w/ Frequencies distributions 
 
-# this list to be set by experimenter; resources, below, are what's used in sim
+# temp notes:
+# this list to be set up by experimenter; 
+# resources, below, are what's used in sim
 # resource frequencies will be variableized
 # resource density will be determined by:
 # set total avail, then randomly assign subsets of the resource
 # eg total = 0.4, a = rand(0, 0.4), total_rem = total - 0 - a.freg
 # repeat for all reso's, could say that if early ones take up entire range, 
 # other ones get some super small value (0.01 or s/t)
+
+# r[0[ = name, r[1] = chance of occurrence, rounded to 2 sig digits]
 resources_list = [
         ['resource a', round(Decimal(0.1), 2)],
         ['resource b', round(Decimal(0.1), 2)],
         ['resource c', round(Decimal(0.2), 2)]
         ]
 
+# Stick all resources into an array of dicts
+# store name, freq, and upper & lower bounds, initially empty
 resources = [ {'name': r[0],  'freq': r[1], 'lower': None, 'upper':
     None } for r in resources_list ]
 
 # set up the resources probability distribtions, based on frequencies
+# these are non-overlapping windows, used to determine, w/ a random
+# number, which reso is on which square
+
 for reso in resources_list:
     lower = 0
     index = resources_list.index(reso)
@@ -48,24 +62,27 @@ for reso in resources_list:
                 r['lower'] = lower
                 r['upper'] = lower + r['freq']
 
-# instantiate an instance to store global simulation parameters
-sim_params = SimParams(world_size=5, num_agents=2, resources=resources)
+# TODO - make multiple parameter values, for batch running
+# & build batch runner functionality
+# world_sizes = []
+# num_agents = []
+# round_lengths =[]
 
-# Build world, keep track of resource numbers
-world_squares = world_builder_fn(sim_params.world_size, sim_params.resources)
-initial_raw_resource_count = 0
-raw_resource_count = 0
-harvested_resource_count = 0
+# Main line(s) to set up sim-wide params
+
+sim_params = SimParams(world_size=5, num_agents=2, resources=resources,
+        round_length=100)
+
+# Build world, using world.py keep track of resource counts
+world = World(sim_params)
+
+#Display round starting state
 print("World Squares:")
-print(world_squares)
-for s in world_squares:
-    print(s.square_resource, s.x, s.y)
-    if s.square_resource:
-        raw_resource_count += 1
-        initial_raw_resource_count += 1
+print(world.squares)
 
-print("Total num raw resources: ", raw_resource_count)
-print("Total num harvested resources: ", harvested_resource_count)
+print("Total num raw resources: ", world.raw_resource_count)
+print("Total num harvested resources: ", world.harvested_resource_count)
+
 
 # Setup Agents
 agent_list=[]
@@ -74,15 +91,13 @@ for i in range(sim_params.num_agents):
         x=random.choice(range(sim_params.world_size)),
         y=random.choice(range(sim_params.world_size)),
         id=i,
-        world_squares = world_squares,
         harvest_duration = 2,
         refine_duration = 5,
-        learning_rate = 1
+        learning_rate = 1,
+        world = world
         ))
 
 
-# number of turns for a single run
-sim_params.round_length = 500
 
 # End World Setup
 ################################################################################
@@ -94,9 +109,9 @@ for round in range(sim_params.round_length):
     for agent in agent_list:
         agent.print_position()
         print(agent.id, " currently doing: ", agent.action)
-        # grab agents' current square from world_squares
+        # grab agents' current square from world.squares
         # "next" grabs matching instance from iterator
-        agent.position = next((square for square in world_squares if square.x == agent.x and
+        agent.position = next((square for square in world.squares if square.x == agent.x and
             square.y == agent.y), None)
 
         # main action: choose between moving, manipulating resources,
@@ -109,7 +124,7 @@ for round in range(sim_params.round_length):
 
         if main_action == agent.resource_actions:
             # i.e., if agent is choosing to do something with resources
-            # then pass world_squares as an argument, round num for counter
+            # then pass world.squares as an argument, round num for counter
             if agent.action == "harvesting":
                 if agent.position.square_resource:
                     print ("agent is harvesting!")
@@ -120,8 +135,8 @@ for round in range(sim_params.round_length):
                                 agent.position.square_resource["name"])
                         agent.inventory.append(agent.position.square_resource)
                         agent.position.square_resource = None
-                        harvested_resource_count += 1
-                        raw_resource_count -= 1
+                        world.harvested_resource_count += 1
+                        world.raw_resource_count -= 1
                         agent.action = ""
                     else:
                         print("agent is still harvesting", agent.position.square_resource)
@@ -132,7 +147,7 @@ for round in range(sim_params.round_length):
             # if agent is doing a resource action besides harvesting (currently
             # aren't any such actions, pick randomly)
             else:
-                sub_action = random.choice(main_action)(agent, world_squares, round)
+                sub_action = random.choice(main_action)(agent, world.squares, round)
 
         elif main_action == agent.move_list:
             # i.e., if agent is moving, pass sim params to access world_size
@@ -147,6 +162,6 @@ for round in range(sim_params.round_length):
 
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 print("Simulation complete")
-print("Num raw resources initially: ", initial_raw_resource_count)
-print("Num raw resources remaining: ", raw_resource_count)
-print("Num harvested resources : ", harvested_resource_count)
+print("Num raw resources initially: ", world.initial_raw_resource_count)
+print("Num raw resources remaining: ", world.raw_resource_count)
+print("Num harvested resources : ", world.harvested_resource_count)
