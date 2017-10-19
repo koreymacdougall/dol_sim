@@ -61,7 +61,7 @@ def resource_selector_fn(resources):
     n = random.random()
     for resource in resources:
         if n > resource['lower'] and n <= resource['upper']:
-            print(n, " is between ", resource['lower'], " and ", resource['upper'])
+            #print(n, " is between ", resource['lower'], " and ", resource['upper'])
             return resource
     return None
 

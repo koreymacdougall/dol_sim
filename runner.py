@@ -28,7 +28,7 @@ class SimParams():
     # repeat for all reso's, could say that if early ones take up entire range, 
     # other ones get some super small value (0.01 or s/t)
     
-def round_runner():
+def round_runner(num_agents):
     # r[0[ = name, r[1] = chance of occurrence, rounded to 2 sig digits]
     resources_list = [
             ['resource a', round(Decimal(0.1), 2)],
@@ -49,18 +49,18 @@ def round_runner():
 
     # Main line(s) to set up sim-wide params
     
-    sim_params = SimParams(world_size=5, num_agents=2, resources=resources,
+    sim_params = SimParams(world_size=5, num_agents=num_agents, resources=resources,
             round_length=400)
-    num_rounds_to_complete = "incomplete"
+    num_rounds_to_complete = "inc"
 
     # Build world, using world.py keep track of resource counts
     world = World(sim_params)
     
     #Display round starting state
-    print("World Squares:")
-    print(world.squares)
-    print("Total num raw resources: ", world.raw_resource_count)
-    print("Total num harvested resources: ", world.harvested_resource_count)
+    #print("World Squares:")
+    #print(world.squares)
+    #print("Total num raw resources: ", world.raw_resource_count)
+    #print("Total num harvested resources: ", world.harvested_resource_count)
     
     # Setup Agents
     setup_agents_fn(sim_params, world)
@@ -70,11 +70,11 @@ def round_runner():
 
     # Round Logic
     for round_num in range(sim_params.round_length):
-        print("Starting round", round_num)
-        print("====================")
+        #print("Starting round", round_num)
+        #print("====================")
         for agent in world.agent_list:
             agent.print_position()
-            print(agent.id, " currently doing: ", agent.action)
+            #print(agent.id, " currently doing: ", agent.action)
             # grab agents' current square from world.squares
             # "next" grabs matching instance from iterator
             agent.position = next((square for square in world.squares if square.x == agent.x and
@@ -93,12 +93,11 @@ def round_runner():
                 # then pass world.squares as an argument, round num for counter
                 if agent.action == "harvesting":
                     if agent.position.square_resource:
-                        print ("agent is harvesting!")
-                        print ("harvesting started on round:", agent.action_start_time)
-                        print ("harvesting will end on round:", agent.action_end_time)
+                        #print("agent is harvesting!")
+                        #print("harvesting started on round:", agent.action_start_time)
+                        #print("harvesting will end on round:", agent.action_end_time)
                         if round_num > agent.action_end_time:
-                            print("agent has finished harvesting",\
-                                    agent.position.square_resource["name"])
+                            #print("agent has finished harvesting", agent.position.square_resource["name"])
                             agent.inventory.append(agent.position.square_resource)
                             agent.position.square_resource = None
                             world.harvested_resource_count += 1
@@ -107,10 +106,11 @@ def round_runner():
                                 num_rounds_to_complete = round_num
                             agent.action = None
                         else:
-                            print("agent is still harvesting", agent.position.square_resource)
+                            #print("agent is still harvesting", agent.position.square_resource)
+                            pass
                     else:
                         #if in harvesting but no resource
-                        print("agent tried to harvest, but no resources found")
+                        #print("agent tried to harvest, but no resources found")
                         agent.action = None
     
                 # if agent is doing a resource action besides harvesting (currently
@@ -124,16 +124,16 @@ def round_runner():
                 sub_action = random.choice(main_action)(agent, sim_params)
     
             agent.print_position()
-            if agent.position.square_resource: \
-                print("Square contains resource: ", \
-                agent.position.square_resource["name"])
+            if agent.position.square_resource:
+                #print("Square contains resource: ", agent.position.square_resource["name"])
+                pass
     
-            print("^^^^^^^^^^")
+            #print("^^^^^^^^^^")
 
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("Simulation complete")
-    print("Num raw resources initially: ", world.initial_raw_resource_count)
-    print("Num raw resources remaining: ", world.raw_resource_count)
-    print("Num harvested resources : ", world.harvested_resource_count)
-    print("Turns taken to harvest all resos: ", num_rounds_to_complete)
-    return [num_rounds_to_complete]
+    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    #print("Simulation complete")
+    #print("Num raw resources initially: ", world.initial_raw_resource_count)
+    #print("Num raw resources remaining: ", world.raw_resource_count)
+    #print("Num harvested resources : ", world.harvested_resource_count)
+    #print("Turns taken to harvest all resos: ", num_rounds_to_complete)
+    return num_rounds_to_complete
