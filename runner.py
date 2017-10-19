@@ -1,7 +1,6 @@
 import random
-from decimal import Decimal, getcontext
 from agent import Agent
-from world import World, WorldSquare, squares_builder_fn
+from world import *
 
 ################################################################################
 # World Setup
@@ -13,7 +12,7 @@ class SimParams():
         self.world_size = world_size
         # num agents is count of agents
         self.num_agents = num_agents
-        #resources are raw items that are modified to make artifcats
+        #resources are raw items that are refined to make artifcats
         self.resources = resources
         # round length is num turns in a single round
         self.round_length = round_length
@@ -39,28 +38,15 @@ resources_list = [
 
 # Stick all resources into an array of dicts
 # store name, freq, and upper & lower bounds, initially empty
+# TODO- make this a fn, and move it into world.py
 resources = [ {'name': r[0],  'freq': r[1], 'lower': None, 'upper':
     None } for r in resources_list ]
 
 # set up the resources probability distribtions, based on frequencies
 # these are non-overlapping windows, used to determine, w/ a random
 # number, which reso is on which square
+resource_freq_assign(resources, resources_list)
 
-for reso in resources_list:
-    lower = 0
-    index = resources_list.index(reso)
-    if index == 0:
-        for r in resources:
-            if r['name'] == reso[0]:
-                r['lower'] = round(Decimal(0), 2)
-                r['upper'] = reso[1]
-    else:
-        for sub_reso in resources_list[0:index]:
-            lower += sub_reso[1]
-        for r in resources:
-            if r['name'] == reso[0]:
-                r['lower'] = lower
-                r['upper'] = lower + r['freq']
 
 # TODO - make multiple parameter values, for batch running
 # & build batch runner functionality
@@ -71,7 +57,7 @@ for reso in resources_list:
 # Main line(s) to set up sim-wide params
 
 sim_params = SimParams(world_size=5, num_agents=2, resources=resources,
-        round_length=100)
+        round_length=400)
 
 # Build world, using world.py keep track of resource counts
 world = World(sim_params)
@@ -79,25 +65,13 @@ world = World(sim_params)
 #Display round starting state
 print("World Squares:")
 print(world.squares)
-
 print("Total num raw resources: ", world.raw_resource_count)
 print("Total num harvested resources: ", world.harvested_resource_count)
 
 
 # Setup Agents
-agent_list=[]
-for i in range(sim_params.num_agents):
-    agent_list.append(Agent(
-        x=random.choice(range(sim_params.world_size)),
-        y=random.choice(range(sim_params.world_size)),
-        id=i,
-        harvest_duration = 2,
-        refine_duration = 5,
-        learning_rate = 1,
-        world = world
-        ))
-
-
+setup_agents_fn(sim_params, world)
+#         ))
 
 # End World Setup
 ################################################################################
@@ -106,7 +80,7 @@ for i in range(sim_params.num_agents):
 for round in range(sim_params.round_length):
     print("Starting round", round)
     print("====================")
-    for agent in agent_list:
+    for agent in world.agent_list:
         agent.print_position()
         print(agent.id, " currently doing: ", agent.action)
         # grab agents' current square from world.squares

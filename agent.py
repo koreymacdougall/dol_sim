@@ -6,8 +6,6 @@ class Agent():
         Knowledge interference levels?
     """
 
-#global world_size
-
     def __init__(self, x, y, id, harvest_duration,
             refine_duration, learning_rate, world):
         self.x = x
