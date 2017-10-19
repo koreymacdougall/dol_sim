@@ -1,0 +1,30 @@
+round logic:
+
+if doing nothing:
+    choose randomly
+
+if harvesting:
+    if time elapsed:
+        done harvesting
+        stop harvesting
+        add resource to inventory
+
+if refining:
+    if time elapsed:
+        done refineing
+        stop refining
+        add artifact to invetory
+
+if has resource && has skill:
+    refine skill
+
+
+
+################################################################################
+
+simplest possible scenario: 1 resource
+
+simplest interesting scenario: 2 resources, no refinement
+individuals make decisions about whether to harvest a resource or not
+- could run a sim with geographical concentration of different resources, which
+    could lead to localized specialization
