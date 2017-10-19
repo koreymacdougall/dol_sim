@@ -136,4 +136,4 @@ def round_runner(num_agents):
     #print("Num raw resources remaining: ", world.raw_resource_count)
     #print("Num harvested resources : ", world.harvested_resource_count)
     #print("Turns taken to harvest all resos: ", num_rounds_to_complete)
-    return num_rounds_to_complete
+    return num_rounds_to_complete, world.initial_raw_resource_count
