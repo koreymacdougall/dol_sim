@@ -3,30 +3,30 @@ from runner import round_runner
 # & build batch runner functionality
 # world_sizes = []
 # num_agents = []
-# round_lengths =[]
-num_runs_per_condition = 10000
+# rounds_per_run =[]
+num_runs_per_condition = 100
 # num_agents = [1,2,3,4,5,6]
-num_agents = list(range(1, 26, 2))
+num_agents = list(range(1, 12, 3))
 
-total_rounds_to_run = num_runs_per_condition*len(num_agents)
+total_runs = num_runs_per_condition*len(num_agents)
 current_run_num = 0
-print("Running ", total_rounds_to_run, " rounds")
+print("Running ", total_runs, " rounds")
 
 # initial header setup
 with open ("data/data_test.txt", "w") as f:
-    f.write("RunNumTot, RunNumCond, NumRunsCompletion, NumAgents, InitResoCnt \n")
+    f.write("RunNumTot, RunNumOfCond, NumRoundsToCompletion, NumAgents, InitResoCnt \n")
 
 #run a single iteration of the sim
 for n_agents in num_agents:
     for run_num_in_cond in range(num_runs_per_condition):
-        print("Running round: ", current_run_num, " of", total_rounds_to_run, " total rounds")
+        print("Run: ", current_run_num, " of", total_runs, " total runs")
         current_run_num += 1
-        num_rounds_to_complete, raw_resos = round_runner(n_agents)
+        num_rounds_to_completion, raw_resos = round_runner(n_agents)
         with open ("data/data_test.txt", "a") as f:
             f.write("{}, {}, {}, {}, {}  \n".format( \
                 current_run_num, \
                 run_num_in_cond, \
-                num_rounds_to_complete, \
+                num_rounds_to_completion, \
                 n_agents, \
                 raw_resos ))
 

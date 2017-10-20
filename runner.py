@@ -6,7 +6,7 @@ from decimal import Decimal, getcontext
     # World Setup
 class SimParams():
     # instance used only to hold simulation level parameters
-    def __init__(self, world_size, num_agents, resources, round_length):
+    def __init__(self, world_size, num_agents, resources, rounds_per_run):
         #world size is a square, rg 5*5
         self.world_size = world_size
         # num agents is count of agents
@@ -14,7 +14,7 @@ class SimParams():
         #resources are raw items that are refined to make artifcats
         self.resources = resources
         # round length is num turns in a single round
-        self.round_length = round_length
+        self.rounds_per_run = rounds_per_run
     
     #Resources w/ Frequencies distributions 
 
@@ -50,8 +50,8 @@ def round_runner(num_agents):
     # Main line(s) to set up sim-wide params
     
     sim_params = SimParams(world_size=5, num_agents=num_agents, resources=resources,
-            round_length=400)
-    num_rounds_to_complete = "inc"
+            rounds_per_run=400)
+    num_rounds_to_completion = "inc"
 
     # Build world, using world.py keep track of resource counts
     world = World(sim_params)
@@ -69,17 +69,18 @@ def round_runner(num_agents):
     ################################################################################
 
     # Round Logic
-    for round_num in range(sim_params.round_length):
+    for round_num in range(sim_params.rounds_per_run):
         #print("Starting round", round_num)
         #print("====================")
         for agent in world.agent_list:
             agent.print_position()
             #print(agent.id, " currently doing: ", agent.action)
+
             # grab agents' current square from world.squares
             # "next" grabs matching instance from iterator
             agent.position = next((square for square in world.squares if square.x == agent.x and
                 square.y == agent.y), None)
-    
+
             # main action: choose between moving, manipulating resources,
             # or something else (TBD); currently random, TODO: will change
             # sub action : choose a sub-action
@@ -87,7 +88,6 @@ def round_runner(num_agents):
             #this else needs to be refactored, redundant with lines below
             if agent.action == None:
                 main_action = random.choice(agent.full_action_list)
-    
             if main_action == agent.resource_actions:
                 # i.e., if agent is choosing to do something with resources
                 # then pass world.squares as an argument, round num for counter
@@ -103,7 +103,7 @@ def round_runner(num_agents):
                             world.harvested_resource_count += 1
                             world.raw_resource_count -= 1
                             if world.raw_resource_count == 0:
-                                num_rounds_to_complete = round_num
+                                num_rounds_to_completion = round_num
                             agent.action = None
                         else:
                             #print("agent is still harvesting", agent.position.square_resource)
@@ -128,6 +128,7 @@ def round_runner(num_agents):
                 #print("Square contains resource: ", agent.position.square_resource["name"])
                 pass
     
+
             #print("^^^^^^^^^^")
 
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -135,5 +136,5 @@ def round_runner(num_agents):
     #print("Num raw resources initially: ", world.initial_raw_resource_count)
     #print("Num raw resources remaining: ", world.raw_resource_count)
     #print("Num harvested resources : ", world.harvested_resource_count)
-    #print("Turns taken to harvest all resos: ", num_rounds_to_complete)
-    return num_rounds_to_complete, world.initial_raw_resource_count
+    #print("Turns taken to harvest all resos: ", num_rounds_to_completion)
+    return num_rounds_to_completion, world.initial_raw_resource_count
