@@ -1,3 +1,6 @@
+import random
+import time
+
 class Agent():
     """ Macro-Cognitive Agent definition
         Several paramters affecting performance:
@@ -20,7 +23,10 @@ class Agent():
         # vary per agent
         self.harvest_duration = harvest_duration
         self.refine_duration = refine_duration
-        self.action = None
+        self.action_type = None
+        self.sub_action = None
+        self.action_start_time = None
+        self.action_end_time = None
         # learning rate will determine how quickly skills improve
         # higher rate, sooner to reach the next level of master
         # Note - this will be a step-wise learning model, with discrete jumps
@@ -63,18 +69,54 @@ class Agent():
             self.y = 0
 
     # agent resource action definitions #######################################
-    def harvest(self, world_squares, round):
-        if self.position.square_resource:
-            #print("harvesting resource: ", self.position.square_resource)
-            #print("initilizing the harvest!!")
-            self.action = "harvesting"
-            self.action_start_time = round
-            self.action_end_time = round + self.harvest_duration
+    def harvest(self, round_num, world, sim_params):
+        # if agent has already started a harvest
+        if self.action_end_time != None:
+            # check if harvest is finished
+            if round_num > self.action_end_time:
+                #print("agent has finished harvesting", self.position.square_resource["name"])
+                # add harvested resource to inentory
+                self.inventory.append(self.position.square_resource)
+                # remove resource from world square
+                self.position.square_resource = None
+                # add 1 to count of harvested resources
+                world.harvested_resource_count += 1
+                # subtract 1 from count of raw / unharvested resources
+                world.raw_resource_count -= 1
+
+                # if all resources have now been harvested, 
+                # return current round number as num_rounds_to_completion
+                if world.raw_resource_count == 0:
+                    sim_params.num_rounds_to_completion = round_num
+                    # TODO - quit run here
+
+                # reset self.action to none
+                self.action_type = None
+                self.sub_action = None
+                self.action_end_time = None
+                self.action_start_time = None
+        
+            # if agent hasn't finished req'd num of harvest rounds ...
+            # don't change action yet
+            else:
+                #print("self is still harvesting", self.position.square_resource)
+                pass
+
+        #if agent hasn't started harvest, check if resource present
+        else:
+            if self.position.square_resource:
+                self.action_start_time = round_num
+                self.action_end_time = round_num + self.harvest_duration
+
+            # if agent attempts to harvest, but no reso present ...
+            # turn is basically wasted
+            else:
+                #print("self tried to harvest, but no resources found")
+                self.action_type = None
 
     def trade(self, world_squares):
         pass
 
-# resources is a list of dicts that store inp
     def refine(self, world_squares):
         pass
 
@@ -98,3 +140,33 @@ class Agent():
     def print_position(self):
       #print("Agent ", self.id, " position x,y:", self.x, self.y)       
       pass
+
+    def act(self, world, round_num, sim_params):
+        self.print_position()
+        #print(self.id, " currently doing: ", self.action_type, self.sub_action)
+        if self.position.square_resource:
+            #print("Square contains resource: ", self.position.square_resource["name"])
+            pass
+
+        # grab agent's current square from world.squares
+        # "next" grabs matching instance from iterator
+        self.position = next((square for square in world.squares \
+            if square.x == self.x and square.y == self.y), None)
+
+        # self.action_type: choose between moving, manipulating resources,
+        # or something else (TBD); currently random
+        if self.action_type == None:
+            self.action_type = random.choice(self.full_action_list)
+            self.sub_action = random.choice(self.action_type)
+            if self.action_type == self.move_list:
+                self.sub_action(self, sim_params)
+                # after running sub act, reset both to None
+                self.action_type = None
+                self.sub_action = None
+            elif self.action_type == self.resource_actions:
+                self.sub_action(self, round_num, world, sim_params)
+
+        # if agent was already in reso action ...
+        elif self.action_type == self.resource_actions:
+            self.sub_action(self, round_num, world, sim_params)
+    

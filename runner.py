@@ -1,4 +1,5 @@
 import random
+import time
 from agent import Agent
 from world import *
 from decimal import Decimal, getcontext
@@ -6,7 +7,8 @@ from decimal import Decimal, getcontext
     # World Setup
 class SimParams():
     # instance used only to hold simulation level parameters
-    def __init__(self, world_size, num_agents, resources, rounds_per_run):
+    def __init__(self, world_size, num_agents, resources, rounds_per_run,
+            num_rounds_to_completion):
         #world size is a square, rg 5*5
         self.world_size = world_size
         # num agents is count of agents
@@ -15,6 +17,7 @@ class SimParams():
         self.resources = resources
         # round length is num turns in a single round
         self.rounds_per_run = rounds_per_run
+        self.num_rounds_to_completion = num_rounds_to_completion
     
     #Resources w/ Frequencies distributions 
 
@@ -28,7 +31,7 @@ class SimParams():
     # repeat for all reso's, could say that if early ones take up entire range, 
     # other ones get some super small value (0.01 or s/t)
     
-def round_runner(num_agents):
+def single_run_runner(num_agents):
     # r[0[ = name, r[1] = chance of occurrence, rounded to 2 sig digits]
     resources_list = [
             ['resource a', round(Decimal(0.1), 2)],
@@ -48,10 +51,15 @@ def round_runner(num_agents):
     resource_freq_assign(resources, resources_list)
 
     # Main line(s) to set up sim-wide params
+    # TODO - move num_rounds_to_completion to somwhere else...
+    sim_params = SimParams(\
+            world_size=5,\
+            num_agents=num_agents,\
+            resources=resources,\
+            rounds_per_run=100,\
+            num_rounds_to_completion="inc")
     
-    sim_params = SimParams(world_size=5, num_agents=num_agents, resources=resources,
-            rounds_per_run=400)
-    num_rounds_to_completion = "inc"
+    # num_rounds_to_completion = "inc"
 
     # Build world, using world.py keep track of resource counts
     world = World(sim_params)
@@ -71,70 +79,15 @@ def round_runner(num_agents):
     # Round Logic
     for round_num in range(sim_params.rounds_per_run):
         #print("Starting round", round_num)
-        #print("====================")
+        #print("================================================================================")
         for agent in world.agent_list:
-            agent.print_position()
-            #print(agent.id, " currently doing: ", agent.action)
-
-            # grab agents' current square from world.squares
-            # "next" grabs matching instance from iterator
-            agent.position = next((square for square in world.squares if square.x == agent.x and
-                square.y == agent.y), None)
-
-            # main action: choose between moving, manipulating resources,
-            # or something else (TBD); currently random, TODO: will change
-            # sub action : choose a sub-action
-            # e.g., move left, move up, harvest resource, trade resource, etc
-            #this else needs to be refactored, redundant with lines below
-            if agent.action == None:
-                main_action = random.choice(agent.full_action_list)
-            if main_action == agent.resource_actions:
-                # i.e., if agent is choosing to do something with resources
-                # then pass world.squares as an argument, round num for counter
-                if agent.action == "harvesting":
-                    if agent.position.square_resource:
-                        #print("agent is harvesting!")
-                        #print("harvesting started on round:", agent.action_start_time)
-                        #print("harvesting will end on round:", agent.action_end_time)
-                        if round_num > agent.action_end_time:
-                            #print("agent has finished harvesting", agent.position.square_resource["name"])
-                            agent.inventory.append(agent.position.square_resource)
-                            agent.position.square_resource = None
-                            world.harvested_resource_count += 1
-                            world.raw_resource_count -= 1
-                            if world.raw_resource_count == 0:
-                                num_rounds_to_completion = round_num
-                            agent.action = None
-                        else:
-                            #print("agent is still harvesting", agent.position.square_resource)
-                            pass
-                    else:
-                        #if in harvesting but no resource
-                        #print("agent tried to harvest, but no resources found")
-                        agent.action = None
-    
-                # if agent is doing a resource action besides harvesting (currently
-                # aren't any such actions, pick randomly)
-                else:
-                    sub_action = random.choice(main_action)(agent, \
-                            world.squares, round_num)
-    
-            elif main_action == agent.move_list:
-                # i.e., if agent is moving, pass sim params to access world_size
-                sub_action = random.choice(main_action)(agent, sim_params)
-    
-            agent.print_position()
-            if agent.position.square_resource:
-                #print("Square contains resource: ", agent.position.square_resource["name"])
-                pass
-    
-
-            #print("^^^^^^^^^^")
+            agent.act(world, round_num, sim_params)
+            ("^^^^^^^^^^")
 
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     #print("Simulation complete")
     #print("Num raw resources initially: ", world.initial_raw_resource_count)
     #print("Num raw resources remaining: ", world.raw_resource_count)
     #print("Num harvested resources : ", world.harvested_resource_count)
-    #print("Turns taken to harvest all resos: ", num_rounds_to_completion)
-    return num_rounds_to_completion, world.initial_raw_resource_count
+    #print("Turns taken to harvest all resos: ", sim_params.num_rounds_to_completion)
+    return sim_params.num_rounds_to_completion, world.initial_raw_resource_count
