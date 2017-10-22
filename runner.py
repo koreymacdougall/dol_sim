@@ -78,11 +78,14 @@ def single_run_runner(num_agents):
 
     # Round Logic
     for round_num in range(sim_params.rounds_per_run):
-        #print("Starting round", round_num)
-        #print("================================================================================")
-        for agent in world.agent_list:
-            agent.act(world, round_num, sim_params)
-            ("^^^^^^^^^^")
+        if sim_params.num_rounds_to_completion == "inc":
+            # print("Starting round", round_num)
+            # time.sleep(0.05)
+            # print("================================================================================")
+            for agent in world.agent_list:
+                agent.act(world, round_num, sim_params)
+                ("^^^^^^^^^^")
+
 
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     #print("Simulation complete")

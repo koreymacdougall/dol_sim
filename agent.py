@@ -88,7 +88,6 @@ class Agent():
                 # return current round number as num_rounds_to_completion
                 if world.raw_resource_count == 0:
                     sim_params.num_rounds_to_completion = round_num
-                    # TODO - quit run here
 
                 # reset self.action to none
                 self.action_type = None
