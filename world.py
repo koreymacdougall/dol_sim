@@ -68,6 +68,8 @@ def resource_selector_fn(resources):
 # setup agents
 
 def setup_agents_fn(sim_params, world):
+    # TODO - stop agents from being on same square!
+    # TODO - if two spawn on same square, can cause "over harvesting"
     world.agent_list=[]
     for i in range(sim_params.num_agents):
         world.agent_list.append(Agent(

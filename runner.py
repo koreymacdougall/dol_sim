@@ -56,7 +56,7 @@ def single_run_runner(num_agents):
             world_size=5,\
             num_agents=num_agents,\
             resources=resources,\
-            rounds_per_run=100,\
+            rounds_per_run=800,\
             num_rounds_to_completion="inc")
     
     # num_rounds_to_completion = "inc"
@@ -89,8 +89,9 @@ def single_run_runner(num_agents):
 
     #print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     #print("Simulation complete")
-    #print("Num raw resources initially: ", world.initial_raw_resource_count)
+    print("Num raw resources initially: ", world.initial_raw_resource_count)
     #print("Num raw resources remaining: ", world.raw_resource_count)
-    #print("Num harvested resources : ", world.harvested_resource_count)
+    print("Num harvested resources : ", world.harvested_resource_count)
     #print("Turns taken to harvest all resos: ", sim_params.num_rounds_to_completion)
-    return sim_params.num_rounds_to_completion, world.initial_raw_resource_count
+    return sim_params.num_rounds_to_completion,\
+world.initial_raw_resource_count, world.harvested_resource_count
