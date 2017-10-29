@@ -3,7 +3,7 @@ import time
 
 class Agent():
     """ Macro-Cognitive Agent definition
-        Several paramters affecting performance:
+        Will have several paramters affecting performance:
         Memory decay rate (from lit)
         Learning / skill mastery rate(from lit)
         Knowledge interference levels?
@@ -16,7 +16,6 @@ class Agent():
         # next method, iterator fn, seems like ruby's first fn
         self.position = next((square for square in world.squares if square.x ==\
             self.x and square.y == self.y), None)
-        #print(self.x, self.y, self.position.x, self.position.y)
         self.id = id
         self.inventory = []
         # harvest duration may be a sim param, may be a skill param, that can
@@ -37,102 +36,77 @@ class Agent():
         
         # TODO: parameterized skills to be built
 
-    # agent movement definitions ##############################################
+    #!! agent move defintiions
     # note that world wraps around on both axes
-
     def move_left(self, sim_params):
-        #print("Moving agent", self.id, "left")
         if self.x - 1 >= 0:
             self.x -= 1
         else:
             self.x = sim_params.world_size - 1
 
     def move_right(self, sim_params):
-        #print("Moving agent", self.id, "right")
         if self.x + 1 <= sim_params.world_size - 1:
             self.x += 1
         else:
             self.x = 0
 
     def move_down(self, sim_params):
-        #print("Moving agent", self.id, "down")
         if self.y - 1 >= 0:
             self.y -= 1
         else:
             self.y = sim_params.world_size - 1
 
     def move_up(self, sim_params):
-        #print("Moving agent", self.id, "up")
         if self.y + 1 <= sim_params.world_size - 1:
             self.y += 1
         else:
             self.y = 0
 
-    def filter_moves(self, world, sim_params):
-        # check which moves are allowable before choosing one
-        # note: could do this by finding the neighbour squares instead
-        current_loc = self.position
-        # print("testing")
-        # print("self position is...")
-        # print(current_loc.x, current_loc.y)
-        # time.sleep(1)
-
-        # check up movement
+    def find_targets(self, world, sim_params):
+        # find squares adjacent to agent
+        # check up square
         if self.y == sim_params.world_size-1:
             up_target = next((square for square in world.squares if square.x ==\
             self.x and square.y == 0), None)
-            # print("worked up wrap")
-            # print(up_target)
         else:
             up_target = next((square for square in world.squares if square.x ==\
             self.x and square.y == self.y + 1), None)
-            # print("worked up")
-            # print(up_target)
 
-        # check down movement
+        # check down square
         if self.y == 0:
             down_target = next((square for square in world.squares if square.x ==\
             self.x and square.y == sim_params.world_size-1), None)
-            # print("worked down wrap")
-            # print(down_target)
         else:
             down_target = next((square for square in world.squares if square.x ==\
             self.x and square.y == self.y - 1), None)
-            # print("worked down")
-            # print(down_target)
 
-        # check right movement
+        # check right square
         if self.x == sim_params.world_size-1:
             right_target = next((square for square in world.squares if\
             square.x == 0 and square.y == self.y), None)
-            # print("worked right wrap")
-            # print(right_target)
         else:
             right_target = next((square for square in world.squares if square.x ==\
             self.x + 1 and square.y == self.y), None)
-            # print("worked right")
-            # print(right_target)
 
-        # check left movement
+        # check left square
         if self.x == 0:
             left_target = next((square for square in world.squares if square.x ==\
             sim_params.world_size-1 and square.y == self.y), None)
-            # print("worked left wrap")
-            # print(left_target)
         else:
             left_target = next((square for square in world.squares if square.x ==\
             self.x - 1  and square.y == self.y), None)
-            # print("worked left")
-            # print(left_target)
+     
+        return(up_target, down_target, right_target, left_target)
 
-        # print("did the filtering")
-        # print("up, down, right, left")
-        # print(up_target.x, up_target.y, down_target.x, down_target.y)
-        # print(left_target.x, left_target.y, right_target.x, right_target.y)
-        # time.sleep(2)
+    def filter_move_actns(self, world, sim_params):
+        # two agents cannot occupy the same point in space
+        # check which moves are allowable before choosing one
+        # this is based on which adjacent squares are occupied
+        # find_targets will grab surrounding squares
+        up_target, down_target, right_target, left_target = \
+                self.find_targets(world, sim_params)
 
-        # targets = [up_target, down_target, right_target, left_target]
-
+        # append moves to filtered_move list
         if not up_target.occupied:
             self.filtered_move_list.append(self.move_up)
         if not down_target.occupied:
@@ -142,19 +116,14 @@ class Agent():
         if not left_target.occupied:
             self.filtered_move_list.append(self.move_left)
 
+    # def filter_reso_actns(self, world, sim_params)
 
-
-
-
-
-
-    # agent resource action definitions #######################################
+    #!! agent resource action definitions
     def harvest(self, round_num, world, sim_params):
         # if agent has already started a harvest
         if self.action_end_time != None:
             # check if harvest is finished
             if round_num > self.action_end_time:
-                #print("agent has finished harvesting", self.position.square_resource["name"])
                 # add harvested resource to inentory
                 self.inventory.append(self.position.square_resource)
                 # remove resource from world square
@@ -174,12 +143,11 @@ class Agent():
                 self.sub_action = None
                 self.action_end_time = None
                 self.action_start_time = None
-                self.filtered_move_list = []
+                # self.filtered_move_list = []
         
             # if agent hasn't finished req'd num of harvest rounds ...
             # don't change action yet
             else:
-                #print("self is still harvesting", self.position.square_resource)
                 pass
 
         #if agent hasn't started harvest, check if resource present
@@ -191,67 +159,96 @@ class Agent():
             # if agent attempts to harvest, but no reso present ...
             # turn is basically wasted
             else:
-                #print("self tried to harvest, but no resources found")
                 self.action_type = None
+        # end harvest() definition 
 
-    def trade(self, world_squares):
+    def refine(self, sim_params, resource):
         pass
 
-    def refine(self, world_squares):
-        pass
+    def trade(self, world):
+        up_target, down_target, right_target, left_target = \
+                self.find_targets(world, sim_params)
+        targets = [up_target, down_target, right_target, left_target]
+        trade_targets = [target for target in targets if target.occupied]
+        print("possible targets:")
+        print(targets)
+        time.sleep(3)
 
     # move_list defines how agents can move around the map
-    move_list = [move_left, move_right, move_down, move_up]
     # multiple agents cannot occupy the same square
+    move_list = [move_left, move_right, move_down, move_up]
 
     # resource_actions defines what agents can do with resources
-    # for now, resource action list is only harvest
+    # by default, only can harvest
+    # add trade if other agents are adjacent,
+    # add refine if agent possesses a reso
     resource_actions = [harvest]
-    #resource_actions = [harvest, trade, refine]
 
-    # skill_list
-    # skill_list = []
+    # skills will be a combination of a transform and a speed
     # This might involve interaction with memory...
+    # skills = {}
 
-    # full action list is a combination of all the possible actions:
-    # move & resource action for now
+    # full action list is a combination of all possible actions
     full_action_list = [move_list, resource_actions]
 
     # print agent position to screen
     def print_position(self):
-      #print("Agent ", self.id, " position x,y:", self.x, self.y)       
+      print("Agent ", self.id, " position x,y:", self.x, self.y)
       pass
 
     def act(self, world, round_num, sim_params):
+        # filtered move list is built based on which adjacent squares are empty
+        # it is rebuilt on each turn
         self.filtered_move_list = []
-        self.print_position()
-        #print(self.id, " currently doing: ", self.action_type, self.sub_action)
-        if self.position.square_resource:
-            #print("Square contains resource: ", self.position.square_resource["name"])
-            pass
+        self.position = next((square for square in world.squares \
+            if square.x == self.x and square.y == self.y), None)
+        # self.print_position()
 
         # grab agent's current square from world.squares
         # "next" grabs matching instance from iterator
-        self.position = next((square for square in world.squares \
-            if square.x == self.x and square.y == self.y), None)
+        # self.position = next((square for square in world.squares \
+        #     if square.x == self.x and square.y == self.y), None)
 
+        # if agent currently not doing anything ...
         # self.action_type: choose between moving, manipulating resources,
         # or something else (TBD); currently random
         if self.action_type == None:
             self.action_type = random.choice(self.full_action_list)
 
+            # 1. if agents selects a move actn ...
             if self.action_type == self.move_list:
-                self.filter_moves(world, sim_params)
-                self.sub_action = random.choice(self.filtered_move_list)
-                self.sub_action(sim_params)
+                # filter to moves to only those that lead to unoccupied squares
+                self.filter_move_actns(world, sim_params)
+                # choose from subset of filtered moves
+                if len(self.filtered_move_list) == 0:
+                    pass
+                else:
+                    # set current square to unoccupied
+                    self.position.occupied = False
+
+                    self.sub_action = random.choice(self.filtered_move_list)
+                    # sim params passed to movement, for dimensions of world
+                    self.sub_action(sim_params)
+
                 # after running sub act, reset both to None
                 self.action_type = None
                 self.sub_action = None
+                # grab new position and set square.occupied
+                self.position = next((square for square in world.squares \
+                    if square.x == self.x and square.y == self.y), None)
+                self.position.occupied = True
+
+            # 2. if agent selects a reso action ...
             elif self.action_type == self.resource_actions:
+                # start new reso action
+                # # filter reso actions based on whether agent holds resos
+                # if self.inventory not None:
+                #     self.filtered_reso_action
                 self.sub_action = random.choice(self.action_type)
                 self.sub_action(self, round_num, world, sim_params)
 
-        # if agent was already in reso action ...
+        # if agent was already in reso action, continue
+        # could DRY up, duplicates call above
         elif self.action_type == self.resource_actions:
             self.sub_action = random.choice(self.action_type)
             self.sub_action(self, round_num, world, sim_params)

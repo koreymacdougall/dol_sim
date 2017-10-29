@@ -5,7 +5,7 @@ from runner import single_run_runner
 # num_agents = []
 # rounds_per_run =[]
 num_runs_per_condition = 50
-num_agents = [3]
+num_agents = [5]
 # num_agents = list(range(1, 12, 3))
 
 total_runs = num_runs_per_condition*len(num_agents)

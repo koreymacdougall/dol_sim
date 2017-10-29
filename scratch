@@ -2,7 +2,8 @@ RETURN and end run after all harvested
 round logic:
 
 if doing nothing:
-    choose randomly
+    ~~ choose randomly ~~
+    choose based on greatest expected value, perhaps with some randomness added
 
 if harvesting:
     if time elapsed:
@@ -29,3 +30,14 @@ simplest interesting scenario: 2 resources, no refinement
 individuals make decisions about whether to harvest a resource or not
 - could run a sim with geographical concentration of different resources, which
     could lead to localized specialization
+
+################################################################################
+
+- could parameterize artifact similarity, as proxy for near- /far-transfer in
+skills
+
+- record all of an agents actions during a round, write this to data, allow it
+  to be loaded back in later
+
+- where random.choice currently occurs in actions, will have to replace with
+  logic based on EV

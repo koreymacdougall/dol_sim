@@ -61,7 +61,6 @@ def resource_selector_fn(resources):
     n = random.random()
     for resource in resources:
         if n > resource['lower'] and n <= resource['upper']:
-            #print(n, " is between ", resource['lower'], " and ", resource['upper'])
             return resource
     return None
 
@@ -72,13 +71,24 @@ def setup_agents_fn(sim_params, world):
     # TODO - if two spawn on same square, can cause "over harvesting"
     world.agent_list=[]
     for i in range(sim_params.num_agents):
+        unplaced = True
+        # randomly choose squares (coords) until an empty one picked
+        while unplaced:
+            x_pos = random.choice(range(sim_params.world_size))
+            y_pos = random.choice(range(sim_params.world_size))
+            target = next((square for square in world.squares \
+                if square.x == x_pos and square.y == y_pos), None)
+            if not target.occupied:
+                target.occupied = True
+                unplaced = False
+
         world.agent_list.append(Agent(
-            x=random.choice(range(sim_params.world_size)),
-            y=random.choice(range(sim_params.world_size)),
+            x=x_pos,
+            y=y_pos,
             id=i,
+            # TODO - implement action durations
             harvest_duration = 2,
             refine_duration = 5,
             learning_rate = 1,
             world = world
             ))
-    # return self.agent_list

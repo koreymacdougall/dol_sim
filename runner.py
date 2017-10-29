@@ -59,16 +59,9 @@ def single_run_runner(num_agents):
             rounds_per_run=800,\
             num_rounds_to_completion="inc")
     
-    # num_rounds_to_completion = "inc"
 
     # Build world, using world.py keep track of resource counts
     world = World(sim_params)
-    
-    #Display round starting state
-    #print("World Squares:")
-    #print(world.squares)
-    #print("Total num raw resources: ", world.raw_resource_count)
-    #print("Total num harvested resources: ", world.harvested_resource_count)
     
     # Setup Agents
     setup_agents_fn(sim_params, world)
@@ -79,19 +72,10 @@ def single_run_runner(num_agents):
     # Round Logic
     for round_num in range(sim_params.rounds_per_run):
         if sim_params.num_rounds_to_completion == "inc":
-            # print("Starting round", round_num)
-            # time.sleep(0.05)
-            # print("================================================================================")
             for agent in world.agent_list:
                 agent.act(world, round_num, sim_params)
                 ("^^^^^^^^^^")
 
 
-    #print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    #print("Simulation complete")
-    print("Num raw resources initially: ", world.initial_raw_resource_count)
-    #print("Num raw resources remaining: ", world.raw_resource_count)
-    print("Num harvested resources : ", world.harvested_resource_count)
-    #print("Turns taken to harvest all resos: ", sim_params.num_rounds_to_completion)
     return sim_params.num_rounds_to_completion,\
 world.initial_raw_resource_count, world.harvested_resource_count
