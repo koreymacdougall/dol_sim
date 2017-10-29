@@ -4,7 +4,7 @@ from agent import Agent
 from decimal import Decimal, getcontext
 
 
-#main world contructor fn
+# main world contructor fn
 class World():
     def __init__(self, sim_params):
         # call square constructor with sim params
@@ -14,7 +14,7 @@ class World():
         self.initial_raw_resource_count = 0
         self.harvested_resource_count = 0
 
-        #tally resources at round start
+        # tally resources at round start
         for s in self.squares:
             if s.square_resource:
                 self.raw_resource_count += 1
@@ -65,7 +65,6 @@ def resource_selector_fn(resources):
     return None
 
 # setup agents
-
 def setup_agents_fn(sim_params, world):
     # TODO - stop agents from being on same square!
     # TODO - if two spawn on same square, can cause "over harvesting"
@@ -92,3 +91,45 @@ def setup_agents_fn(sim_params, world):
             learning_rate = 1,
             world = world
             ))
+        target.occupant = world.agent_list[-1]
+
+def draw_world(sim_params, world, round_num):
+    print("starting round ", round_num)
+    map_string = ""
+    # horizontal divider added between every row
+    map_string_horizontal_divider = "\t" + sim_params.world_size * (5 * "-" + " ")
+    map_string += map_string_horizontal_divider
+    map_string += "\n"
+    for y in reversed(range(sim_params.world_size)):
+        row = [square for square in world.squares if square.y == y]
+        map_string += "y:" + str(y)+ "\t" 
+        for sq in row:
+            if sq.occupied:
+                occupant = sq.occupant.id
+            else:
+                occupant = " "
+            if sq.square_resource:
+                reso = sq.square_resource["name"][-1]
+            else:
+                reso = " "
+            map_string += "|{}|{}| ".format(occupant, reso)
+
+        map_string += "\n" + map_string_horizontal_divider + "\n"
+        # map_string += 
+        # map_string += "\n"
+        # print(sq.x, sq.y)
+        # if sq.occupied:
+        #     print("#####\n#{}|{}#\n#####".format(sq.occupant.id, "="))
+        # else:
+        #     print("#####\n#{}|{}#\n#####".format("-", "="))
+    
+    # map_string += "\t x:r   x:2   x:3   x:4"
+    bottom_string = "\t "
+    for col in range(sim_params.world_size):
+        piece = "x:" + str(col) + "   "
+        bottom_string += piece
+    map_string += bottom_string
+
+    print(map_string)
+    time.sleep(2)
+

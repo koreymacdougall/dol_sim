@@ -224,7 +224,7 @@ class Agent():
                     pass
                 else:
                     # set current square to unoccupied
-                    self.position.occupied = False
+                    self.position.occupied, self.position.occupant = False, None
 
                     self.sub_action = random.choice(self.filtered_move_list)
                     # sim params passed to movement, for dimensions of world
@@ -236,7 +236,7 @@ class Agent():
                 # grab new position and set square.occupied
                 self.position = next((square for square in world.squares \
                     if square.x == self.x and square.y == self.y), None)
-                self.position.occupied = True
+                self.position.occupied, self.position.occupant = True, self
 
             # 2. if agent selects a reso action ...
             elif self.action_type == self.resource_actions:
