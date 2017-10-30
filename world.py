@@ -4,6 +4,7 @@ import sys, os
 from termcolor import colored, cprint
 from agent import Agent
 from decimal import Decimal, getcontext
+from collections import Counter
 
 
 # main world contructor fn
@@ -130,5 +131,15 @@ def draw_world(sim_params, world, round_num):
     map_string += bottom_string
 
     print(map_string)
+    print("\n" + 80 * "*")
+    for agent in world.agent_list:
+        agent.counts = {}
+        for item in agent.inventory:
+            if item["name"] in agent.counts:
+                agent.counts[item["name"]] += 1
+            else:
+                agent.counts[item["name"]] = 1
+        print("Agent", agent.id, "inventory: ", agent.counts)
     time.sleep(0.1)
+
 

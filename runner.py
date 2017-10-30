@@ -31,7 +31,7 @@ class SimParams():
     # repeat for all reso's, could say that if early ones take up entire range, 
     # other ones get some super small value (0.01 or s/t)
     
-def single_run_runner(num_agents):
+def single_run_runner(num_agents, world_size):
     # r[0[ = name, r[1] = chance of occurrence, rounded to 2 sig digits]
     resources_list = [
             ['resource a', round(Decimal(0.1), 2)],
@@ -53,7 +53,7 @@ def single_run_runner(num_agents):
     # Main line(s) to set up sim-wide params
     # TODO - move num_rounds_to_completion to somwhere else...
     sim_params = SimParams(\
-            world_size=5,\
+            world_size=world_size,\
             num_agents=num_agents,\
             resources=resources,\
             rounds_per_run=800,\
@@ -75,6 +75,7 @@ def single_run_runner(num_agents):
             for agent in world.agent_list:
                 agent.act(world, round_num, sim_params)
                 ("^^^^^^^^^^")
+            # demo mode - comment out this line if running for data
             draw_world(sim_params, world, round_num)
         else:
             pass
