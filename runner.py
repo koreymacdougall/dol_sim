@@ -53,7 +53,7 @@ def single_run_runner(num_agents):
     # Main line(s) to set up sim-wide params
     # TODO - move num_rounds_to_completion to somwhere else...
     sim_params = SimParams(\
-            world_size=9,\
+            world_size=5,\
             num_agents=num_agents,\
             resources=resources,\
             rounds_per_run=800,\
@@ -71,12 +71,14 @@ def single_run_runner(num_agents):
 
     # Round Logic
     for round_num in range(sim_params.rounds_per_run):
-        draw_world(sim_params, world, round_num)
         if sim_params.num_rounds_to_completion == "inc":
             for agent in world.agent_list:
                 agent.act(world, round_num, sim_params)
                 ("^^^^^^^^^^")
-
+            draw_world(sim_params, world, round_num)
+        else:
+            pass
 
     return sim_params.num_rounds_to_completion,\
-world.initial_raw_resource_count, world.harvested_resource_count
+            world.initial_raw_resource_count,\
+            world.harvested_resource_count

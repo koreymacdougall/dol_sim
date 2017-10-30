@@ -1,5 +1,7 @@
 import random
 import time
+import sys, os
+from termcolor import colored, cprint
 from agent import Agent
 from decimal import Decimal, getcontext
 
@@ -94,14 +96,19 @@ def setup_agents_fn(sim_params, world):
         target.occupant = world.agent_list[-1]
 
 def draw_world(sim_params, world, round_num):
+    # this fn will draw the map each round
+    # relies on python termcolor module for coloring
+    os.system("clear")
     print("starting round ", round_num)
+    print("\t\t\t initial resource count: ", + world.initial_raw_resource_count)
+    print("\t\t\t current resource count: ", + world.raw_resource_count)
     map_string = ""
     # horizontal divider added between every row
-    map_string_horizontal_divider = "\t" + sim_params.world_size * (5 * "-" + " ")
-    map_string += map_string_horizontal_divider
-    map_string += "\n"
+    map_string_horizontal_divider = "\t" + sim_params.world_size * (5 * "-" + "\t")
+    # map_string += map_string_horizontal_divider + "\n"
     for y in reversed(range(sim_params.world_size)):
         row = [square for square in world.squares if square.y == y]
+        map_string += map_string_horizontal_divider + "\n"
         map_string += "y:" + str(y)+ "\t" 
         for sq in row:
             if sq.occupied:
@@ -112,24 +119,16 @@ def draw_world(sim_params, world, round_num):
                 reso = sq.square_resource["name"][-1]
             else:
                 reso = " "
-            map_string += "|{}|{}| ".format(occupant, reso)
+            map_string += "|{}|{}|\t".format(colored(occupant, "blue"),
+                    colored(reso, "red"))
 
-        map_string += "\n" + map_string_horizontal_divider + "\n"
-        # map_string += 
-        # map_string += "\n"
-        # print(sq.x, sq.y)
-        # if sq.occupied:
-        #     print("#####\n#{}|{}#\n#####".format(sq.occupant.id, "="))
-        # else:
-        #     print("#####\n#{}|{}#\n#####".format("-", "="))
-    
-    # map_string += "\t x:r   x:2   x:3   x:4"
+        map_string += "\n" + map_string_horizontal_divider + "\n\n"
     bottom_string = "\t "
     for col in range(sim_params.world_size):
-        piece = "x:" + str(col) + "   "
+        piece = "x:" + str(col) + "\t"
         bottom_string += piece
     map_string += bottom_string
 
     print(map_string)
-    time.sleep(2)
+    time.sleep(0.1)
 
